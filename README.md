@@ -91,7 +91,7 @@ Generates dense embeddings for phage DNA sequences using the pre-trained [megaDN
 ### Endpoints
 
 - `POST /embed` — embed a single sequence
-- `POST /batch_embed` — embed multiple sequences (recommended for throughput)
+- `POST /embed_batch` — embed multiple sequences (recommended for throughput)
 
 ### Output format
 
@@ -105,7 +105,7 @@ Generates dense embeddings for phage DNA sequences using the pre-trained [megaDN
 }
 ```
 
-**Batch** (`POST /batch_embed`):
+**Batch** (`POST /embed_batch`):
 ```json
 {
   "embeddings": [[0.123, -0.456, ...], [0.234, -0.567, ...]],
@@ -174,7 +174,7 @@ The phages_dataset `phrog` feature calculator uses this service to annotate pred
 
 Predicts phage lifestyle (virulent vs temperate) from a genome DNA sequence using [BACPHLIP](https://github.com/adamhockenberry/bacphlip). HMMER3 scans the predicted proteins against 206 curated HMM profiles; the resulting binary feature vector is fed to a Random Forest classifier.
 
-The 206 HMM domain features are also used by the `TieredLifecycleStrategy` in phages_dataset — 22 lysogeny-associated domains (integrases, recombinases, excisionases) serve as Tier 2 evidence for temperate lifestyle assignment.
+The 206 HMM domain features are consumed by `phages_dataset` as the `bacphlip` feature group.
 
 ### Endpoints
 
@@ -218,7 +218,7 @@ Service v0.2.0 features a fully vectorized numpy tokenizer and stride=10 (10x fe
 
 ### Endpoints
 
-- `POST /predict` — predict lifestyle for one or more sequences
+- `POST /predict/batch` — predict lifestyle for one or more sequences
 
 ### Input format
 
@@ -275,7 +275,7 @@ uv run uvicorn service:app --host 0.0.0.0 --port 8005
 
 ### Endpoints
 
-- `POST /predict` — run full PhaBOX2 analysis on one or more sequences
+- `POST /predict/batch` — run full PhaBOX2 analysis on one or more sequences
 
 ### Input format
 
@@ -311,25 +311,6 @@ uv run uvicorn service:app --host 0.0.0.0 --port 8005
 ```
 
 `skipped: true` is set for sequences below the 3,000 bp minimum length threshold.
-
----
-
-## Shared Contracts
-
-The `contracts/` directory contains a `phages-contracts` Python package with shared Pydantic request/response models for all service APIs. This prevents contract drift between services (server side) and phages_dataset feature calculators (client side).
-
-```
-contracts/src/phages_contracts/
-├── __init__.py       # re-exports all models
-├── health.py         # HealthResponse (standard for all services)
-├── megadna.py        # EmbedRequest, EmbedBatchRequest, EmbedResponse, EmbedBatchResponse
-├── bacphlip.py       # BacphlipPredictRequest, BacphlipPredictResponse
-├── deeppl.py         # DeepPLBatchRequest, DeepPLBatchResponse, DeepPLResult
-├── hmm.py            # HMMSearchRequest, HMMSearchResponse, ProteinInput, GenomeHMMResult
-└── phabox.py         # PhaboxBatchRequest, PhaboxBatchResponse, PhaboxResult
-```
-
-Install as a dependency: `uv add phages-contracts --path ../contracts`
 
 ---
 

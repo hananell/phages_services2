@@ -35,3 +35,4 @@ embeddings_umap*.png
 # Service databases and model weights (download separately, see each service's README)
 phabox-service/phabox_db_v2/
 deeppl-service/model/
+.gitnexus
